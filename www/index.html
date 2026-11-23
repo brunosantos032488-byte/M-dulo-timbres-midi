@@ -1,10 +1,39 @@
 <!DOCTYPE html>
-<html>
-<body style="background:#000; color:#fff; text-align:center; padding:40px; font-family:sans-serif;">
-  <h1 id="txt">TESTE DE TOQUE</h1>
-  <button style="font-size:24px; padding:30px; background:green; color:white; border:none; border-radius:12px;"
-    onclick="document.getElementById('txt').innerText='FUNCIONOU!'; var c=new AudioContext(); var o=c.createOscillator(); o.connect(c.destination); o.start(); setTimeout(()=>o.stop(),400);">
-    TOQUE AQUI
-  </button>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Módulo de Timbres</title>
+    <style>
+        body { background: #121212; color: #fff; font-family: sans-serif; text-align: center; padding: 15px; margin: 0; }
+        .status { background: #1e1e1e; padding: 12px; border-radius: 8px; margin-bottom: 12px; color: #00e676; border: 1px solid #333; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 500px; margin: 0 auto 15px auto; }
+        button { background: #262626; color: #fff; border: 2px solid #444; padding: 15px 8px; font-size: 14px; border-radius: 10px; font-weight: bold; }
+        button.ativo { background: #0066cc; border-color: #3399ff; }
+        .btn-nota { background: #333; padding: 18px 20px; margin: 4px; }
+        .btn-midi { background: #1b5e20; border-color: #4caf50; width: 100%; max-width: 500px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h2>🎹 Módulo de Timbres Pro</h2>
+    <div id="status" class="status">✅ Toque em um botão abaixo</div>
+    <button id="btn-midi" class="btn-midi">🔌 Conectar Teclado USB</button>
+
+    <div class="grid">
+        <button class="btn-t ativo" data-t="piano">🎹 Piano</button>
+        <button class="btn-t" data-t="rhodes">⚡ Rhodes</button>
+        <button class="btn-t" data-t="strings">🎻 Strings</button>
+        <button class="btn-t" data-t="pad">☁️ Warm Pad</button>
+        <button class="btn-t" data-t="organ">⛪ Órgão</button>
+        <button class="btn-t" data-t="brass">🎺 Brass</button>
+    </div>
+
+    <div>
+        <button class="btn-nota" data-n="60">Dó (C4)</button>
+        <button class="btn-nota" data-n="64">Mi (E4)</button>
+        <button class="btn-nota" data-n="67">Sol (G4)</button>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
