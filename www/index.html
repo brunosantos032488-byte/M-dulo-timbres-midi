@@ -3,21 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Módulo de Timbres</title>
+    <title>Módulo de Timbres Pro</title>
     <style>
-        body { background: #121212; color: #fff; font-family: sans-serif; text-align: center; padding: 15px; margin: 0; }
-        .status { background: #1e1e1e; padding: 12px; border-radius: 8px; margin-bottom: 12px; color: #00e676; border: 1px solid #333; }
+        body { background: #121212; color: #fff; font-family: sans-serif; text-align: center; padding: 15px; margin: 0; user-select: none; }
+        .status { background: #1e1e1e; padding: 12px; border-radius: 8px; margin-bottom: 12px; color: #00e676; border: 1px solid #333; font-size: 14px; }
+        .grid-p { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 500px; margin: 0 auto 14px auto; }
+        .btn-p { background: #252525; color: #ffd54f; border: 2px solid #554400; padding: 10px 4px; font-size: 13px; border-radius: 8px; font-weight: bold; }
+        .btn-p.ativo { background: #ff8f00; color: #000; border-color: #ffe082; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 500px; margin: 0 auto 15px auto; }
         button { background: #262626; color: #fff; border: 2px solid #444; padding: 15px 8px; font-size: 14px; border-radius: 10px; font-weight: bold; }
         button.ativo { background: #0066cc; border-color: #3399ff; }
         .btn-nota { background: #333; padding: 18px 20px; margin: 4px; }
-        .btn-midi { background: #1b5e20; border-color: #4caf50; width: 100%; max-width: 500px; margin-bottom: 15px; }
+        .btn-midi { background: #1b5e20; border-color: #4caf50; width: 100%; max-width: 500px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
     <h2>🎹 Módulo de Timbres Pro</h2>
-    <div id="status" class="status">✅ Toque em um botão abaixo</div>
+    <div id="status" class="status">Iniciando...</div>
     <button id="btn-midi" class="btn-midi">🔌 Conectar Teclado USB</button>
+
+    <div class="grid-p">
+        <button class="btn-p ativo" data-p="0">P1<br>Piano</button>
+        <button class="btn-p" data-p="1">P2<br>Rhodes</button>
+        <button class="btn-p" data-p="2">P3<br>Pad</button>
+        <button class="btn-p" data-p="3">P4<br>Brass</button>
+    </div>
 
     <div class="grid">
         <button class="btn-t ativo" data-t="piano">🎹 Piano</button>
@@ -34,6 +44,164 @@
         <button class="btn-nota" data-n="67">Sol (G4)</button>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        var ac = null;
+        var timbre = 'piano';
+        var vozes = {};
+        var statusEl = document.getElementById('status');
+
+        function log(txt) {
+            statusEl.innerText = txt;
+        }
+
+        function iniciarAudio() {
+            if (!ac) {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                ac = new Ctx();
+            }
+            if (ac.state === 'suspended') ac.resume();
+        }
+
+        var botoesT = document.getElementsByClassName('btn-t');
+        for (var i = 0; i < botoesT.length; i++) {
+            botoesT.item(i).addEventListener('click', function() {
+                iniciarAudio();
+                timbre = this.getAttribute('data-t');
+                for (var j = 0; j < botoesT.length; j++) botoesT.item(j).className = 'btn-t';
+                for (var p = 0; p < botoesP.length; p++) botoesP.item(p).className = 'btn-p';
+                this.className = 'btn-t ativo';
+                log('🎵 Timbre: ' + this.innerText);
+            });
+        }
+
+        var botoesP = document.getElementsByClassName('btn-p');
+        for (var pIdx = 0; pIdx < botoesP.length; pIdx++) {
+            botoesP.item(pIdx).addEventListener('click', function() {
+                iniciarAudio();
+                var num = this.getAttribute('data-p');
+                for (var j = 0; j < botoesT.length; j++) botoesT.item(j).className = 'btn-t';
+                for (var p = 0; p < botoesP.length; p++) botoesP.item(p).className = 'btn-p';
+                this.className = 'btn-p ativo';
+
+                if (num === '0') { timbre = 'piano'; botoesT.item(0).className = 'btn-t ativo'; }
+                if (num === '1') { timbre = 'rhodes'; botoesT.item(1).className = 'btn-t ativo'; }
+                if (num === '2') { timbre = 'pad'; botoesT.item(3).className = 'btn-t ativo'; }
+                if (num === '3') { timbre = 'brass'; botoesT.item(5).className = 'btn-t ativo'; }
+                log('⚡ Preset P' + (Number(num) + 1) + ' ativo!');
+            });
+        }
+
+        var botoesN = document.getElementsByClassName('btn-nota');
+        for (var k = 0; k < botoesN.length; k++) {
+            botoesN.item(k).addEventListener('click', function() {
+                var nota = parseInt(this.getAttribute('data-n'), 10);
+                log('🔊 Tocando nota ' + nota);
+                tocarNota(nota, 115);
+                setTimeout(function() { pararNota(nota); }, 600);
+            });
+        }
+
+        function tocarNota(nota, vel) {
+            iniciarAudio();
+            if (vozes[nota]) pararNota(nota);
+
+            var agora = ac.currentTime;
+            var freq = 440 * Math.pow(2, (nota - 69) / 12);
+            var vol = (vel / 127) * 0.5;
+
+            var o1 = ac.createOscillator();
+            var o2 = ac.createOscillator();
+            var flt = ac.createBiquadFilter();
+            var ganho = ac.createGain();
+
+            o1.frequency.setValueAtTime(freq, agora);
+            o2.frequency.setValueAtTime(freq, agora);
+            flt.type = 'lowpass';
+
+            var atk = 0.01, dec = 0.4, sus = 0.3, rel = 0.5;
+
+            if (timbre === 'piano') {
+                o1.type = 'triangle'; o2.type = 'sine'; o2.frequency.setValueAtTime(freq * 2, agora);
+                flt.frequency.setValueAtTime(2200, agora);
+            } else if (timbre === 'rhodes') {
+                o1.type = 'sine'; o2.type = 'triangle'; o2.frequency.setValueAtTime(freq * 3, agora);
+                flt.frequency.setValueAtTime(1400, agora);
+            } else if (timbre === 'strings') {
+                o1.type = 'sawtooth'; o2.type = 'sawtooth'; o1.detune.setValueAtTime(-9, agora); o2.detune.setValueAtTime(9, agora);
+                flt.frequency.setValueAtTime(1800, agora); atk = 0.2; sus = 0.85; rel = 0.7;
+            } else if (timbre === 'pad') {
+                o1.type = 'sawtooth'; o2.type = 'triangle'; o1.detune.setValueAtTime(-14, agora); o2.detune.setValueAtTime(14, agora);
+                flt.frequency.setValueAtTime(900, agora); atk = 0.35; sus = 0.9; rel = 1.2;
+            } else if (timbre === 'organ') {
+                o1.type = 'sine'; o2.type = 'square'; o2.frequency.setValueAtTime(freq * 2, agora);
+                flt.frequency.setValueAtTime(2400, agora); sus = 0.9; rel = 0.15;
+            } else if (timbre === 'brass') {
+                o1.type = 'sawtooth'; o2.type = 'sawtooth'; o1.detune.setValueAtTime(-6, agora); o2.detune.setValueAtTime(6, agora);
+                flt.frequency.setValueAtTime(600, agora); flt.frequency.linearRampToValueAtTime(2800, agora + 0.12);
+                atk = 0.06; sus = 0.85; rel = 0.25;
+            }
+
+            o1.connect(flt);
+            o2.connect(flt);
+            flt.connect(ganho);
+            ganho.connect(ac.destination);
+
+            ganho.gain.setValueAtTime(0.001, agora);
+            ganho.gain.linearRampToValueAtTime(vol, agora + atk);
+            ganho.gain.exponentialRampToValueAtTime(Math.max(vol * sus, 0.001), agora + atk + dec);
+
+            o1.start(agora);
+            o2.start(agora);
+            vozes[nota] = { o1: o1, o2: o2, g: ganho, r: rel };
+        }
+
+        function pararNota(nota) {
+            var v = vozes[nota];
+            if (!v || !ac) return;
+            var agora = ac.currentTime;
+            v.g.gain.cancelScheduledValues(agora);
+            v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.001), agora);
+            v.g.gain.exponentialRampToValueAtTime(0.0001, agora + v.r);
+            v.o1.stop(agora + v.r + 0.05);
+            v.o2.stop(agora + v.r + 0.05);
+            vozes[nota] = null;
+        }
+
+        document.getElementById('btn-midi').addEventListener('click', function() {
+            iniciarAudio();
+            if (!navigator.requestMIDIAccess) {
+                log('⚠️ MIDI não suportado.');
+                return;
+            }
+            log('🔍 Buscando teclado...');
+            navigator.requestMIDIAccess().then(function(midi) {
+                var achou = false;
+                midi.inputs.forEach(function(inp) {
+                    achou = true;
+                    log('🎹 Conectado: ' + inp.name);
+                    inp.onmidimessage = lerMIDI;
+                });
+                if (!achou) log('⚠️ Conecte o cabo OTG e toque aqui.');
+                midi.onstatechange = function(e) {
+                    if (e.port.type === 'input' && e.port.state === 'connected') {
+                        log('🎹 Conectado: ' + e.port.name);
+                        e.port.onmidimessage = lerMIDI;
+                    }
+                };
+            });
+        });
+
+        function lerMIDI(m) {
+            var bytes = Array.from(m.data);
+            if (bytes.length < 2) return;
+            var cmd = bytes.shift();
+            var nota = bytes.shift();
+            var vel = bytes.length > 0 ? bytes.shift() : 0;
+            if (cmd >= 144 && cmd <= 159 && vel > 0) tocarNota(nota, vel);
+            else if ((cmd >= 128 && cmd <= 143) || (cmd >= 144 && cmd <= 159 && vel === 0)) pararNota(nota);
+        }
+
+        log('✅ Pronto! Toque em um botão.');
+    </script>
 </body>
 </html>
