@@ -1,0 +1,4 @@
+function receberMensagemMIDI(mensagem) {
+    const comando = mensagem.data[0];
+    const nota = mensagem.data[1];
+    const velocidade = (mensagem.data.length > 2) ? mensagem.data[2] : 0;
