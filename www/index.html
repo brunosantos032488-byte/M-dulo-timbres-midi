@@ -10,61 +10,131 @@
             background-color: #121212;
             color: #ffffff;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             margin: 0;
             user-select: none;
         }
+        h2 {
+            margin: 5px 0 12px 0;
+            font-size: 20px;
+        }
         .status {
             background: #1e1e1e;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            margin-bottom: 16px;
+            font-size: 13px;
             color: #00e676;
             border: 1px solid #333;
+        }
+        .secao-titulo {
+            font-size: 13px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 12px 0 8px 0;
+        }
+        .grid-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto 18px auto;
+        }
+        .btn-preset {
+            background-color: #252525;
+            color: #ffd54f;
+            border: 2px solid #554400;
+            padding: 12px 4px;
+            font-size: 13px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .btn-preset.ativo {
+            background-color: #ff8f00;
+            color: #000;
+            border-color: #ffe082;
         }
         .grid-timbres {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
             max-width: 500px;
-            margin: 0 auto 30px auto;
+            margin: 0 auto 22px auto;
         }
-        button {
-            background-color: #2c2c2c;
+        .btn-timbre {
+            background-color: #262626;
             color: white;
-            border: 2px solid #444;
-            padding: 20px 10px;
-            font-size: 16px;
+            border: 2px solid #3d3d3d;
+            padding: 16px 8px;
+            font-size: 15px;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
             touch-action: manipulation;
         }
-        button.ativo {
+        .btn-timbre.ativo {
             background-color: #0066cc;
             border-color: #3399ff;
         }
+        .teste-notas {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+            border: 1px solid #2c2c2c;
+        }
+        .teste-notas p {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #bbb;
+        }
         .teste-notas button {
             background-color: #333;
-            padding: 18px 22px;
-            margin: 5px;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 16px 20px;
+            margin: 0 4px;
+            touch-action: manipulation;
+        }
+        .dica {
+            font-size: 11px;
+            color: #777;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
 
-    <h2>🎹 Módulo de Timbres (Offline)</h2>
-    <div id="status-midi" class="status">✅ Pronto! Toque em uma nota abaixo ou conecte o teclado.</div>
+    <h2>🎹 Módulo de Timbres Pro</h2>
+    <div id="status-midi" class="status">✅ Pronto! Escolha um Preset ou Timbre abaixo.</div>
 
-    <h3>Escolha o Timbre:</h3>
+    <div class="secao-titulo">⚡ Presets Rápidos (Segure 2s para salvar)</div>
+    <div class="grid-presets">
+        <button class="btn-preset ativo" id="preset-0" ontouchstart="iniciarPressaoPreset(0)" ontouchend="soltarPressaoPreset(0)" onmousedown="iniciarPressaoPreset(0)" onmouseup="soltarPressaoPreset(0)">P1<br><span id="lbl-p0">Piano</span></button>
+        <button class="btn-preset" id="preset-1" ontouchstart="iniciarPressaoPreset(1)" ontouchend="soltarPressaoPreset(1)" onmousedown="iniciarPressaoPreset(1)" onmouseup="soltarPressaoPreset(1)">P2<br><span id="lbl-p1">Rhodes</span></button>
+        <button class="btn-preset" id="preset-2" ontouchstart="iniciarPressaoPreset(2)" ontouchend="soltarPressaoPreset(2)" onmousedown="iniciarPressaoPreset(2)" onmouseup="soltarPressaoPreset(2)">P3<br><span id="lbl-p2">Pad</span></button>
+        <button class="btn-preset" id="preset-3" ontouchstart="iniciarPressaoPreset(3)" ontouchend="soltarPressaoPreset(3)" onmousedown="iniciarPressaoPreset(3)" onmouseup="soltarPressaoPreset(3)">P4<br><span id="lbl-p3">Brass</span></button>
+    </div>
+
+    <div class="secao-titulo">🎛️ Banco de Timbres (10 Sons)</div>
     <div class="grid-timbres">
-        <button onclick="selecionarTimbre('piano', this)" class="ativo">🎹 Piano</button>
-        <button onclick="selecionarTimbre('rhodes', this)">⚡ Rhodes / E.Piano</button>
-        <button onclick="selecionarTimbre('strings', this)">🎻 Strings (Cordas)</button>
-        <button onclick="selecionarTimbre('pad', this)">☁️ Warm Pad</button>
-        <button onclick="selecionarTimbre('organ', this)">⛪ Órgão</button>
-        <button onclick="selecionarTimbre('bass', this)">🎸 Synth Bass</button>
+        <button class="btn-timbre ativo" data-timbre="piano" onclick="selecionarTimbre('piano', 'Piano', this)">🎹 Piano Acústico</button>
+        <button class="btn-timbre" data-timbre="bright_piano" onclick="selecionarTimbre('bright_piano', 'B.Piano', this)">✨ Bright Piano</button>
+        <button class="btn-timbre" data-timbre="rhodes" onclick="selecionarTimbre('rhodes', 'Rhodes', this)">⚡ Rhodes / E.Piano</button>
+        <button class="btn-timbre" data-timbre="bells" onclick="selecionarTimbre('bells', 'Bells', this)">🔔 Crystal Bells</button>
+        <button class="btn-timbre" data-timbre="strings" onclick="selecionarTimbre('strings', 'Strings', this)">🎻 Strings (Cordas)</button>
+        <button class="btn-timbre" data-timbre="pad" onclick="selecionarTimbre('pad', 'Pad', this)">☁️ Warm Pad</button>
+        <button class="btn-timbre" data-timbre="organ" onclick="selecionarTimbre('organ', 'Órgão', this)">⛪ Órgão Gospel</button>
+        <button class="btn-timbre" data-timbre="brass" onclick="selecionarTimbre('brass', 'Brass', this)">🎺 Brass / Metais</button>
+        <button class="btn-timbre" data-timbre="lead" onclick="selecionarTimbre('lead', 'Lead', this)">🚀 Synth Lead</button>
+        <button class="btn-timbre" data-timbre="bass" onclick="selecionarTimbre('bass', 'Bass', this)">🎸 Sub / Synth Bass</button>
     </div>
 
     <div class="teste-notas">
@@ -72,12 +142,67 @@
         <button ontouchstart="tocarNota(60); event.preventDefault();" ontouchend="pararNota(60)" onmousedown="tocarNota(60)" onmouseup="pararNota(60)">Dó (C4)</button>
         <button ontouchstart="tocarNota(64); event.preventDefault();" ontouchend="pararNota(64)" onmousedown="tocarNota(64)" onmouseup="pararNota(64)">Mi (E4)</button>
         <button ontouchstart="tocarNota(67); event.preventDefault();" ontouchend="pararNota(67)" onmousedown="tocarNota(67)" onmouseup="pararNota(67)">Sol (G4)</button>
+        <div class="dica">Dica: Escolha um timbre e segure P1, P2, P3 ou P4 para gravar na memória.</div>
     </div>
 
     <script>
         let ac = null;
         let timbreAtual = 'piano';
+        let nomeCurtoAtual = 'Piano';
         let vozesAtivas = {};
+
+        // Presets padrão (carrega salvos do celular se existirem)
+        let presets = JSON.parse(localStorage.getItem('meus_presets_midi')) || [
+            { timbre: 'piano', label: 'Piano' },
+            { timbre: 'rhodes', label: 'Rhodes' },
+            { timbre: 'pad', label: 'Pad' },
+            { timbre: 'brass', label: 'Brass' }
+        ];
+
+        function atualizarLabelsPresets() {
+            presets.forEach((p, idx) => {
+                const el = document.getElementById('lbl-p' + idx);
+                if (el) el.innerText = p.label;
+            });
+        }
+        atualizarLabelsPresets();
+
+        let timerSegurar = null;
+        let segurou = false;
+
+        function iniciarPressaoPreset(index) {
+            segurou = false;
+            timerSegurar = setTimeout(() => {
+                segurou = true;
+                presets[index] = { timbre: timbreAtual, label: nomeCurtoAtual };
+                localStorage.setItem('meus_presets_midi', JSON.stringify(presets));
+                atualizarLabelsPresets();
+                marcarBotaoPreset(index);
+                document.getElementById('status-midi').innerText = "💾 Salvo no Preset P" + (index + 1) + ": " + nomeCurtoAtual;
+            }, 1200);
+        }
+
+        function soltarPressaoPreset(index) {
+            clearTimeout(timerSegurar);
+            if (!segurou) {
+                ativarPreset(index);
+            }
+        }
+
+        function marcarBotaoPreset(index) {
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('ativo'));
+            const btn = document.getElementById('preset-' + index);
+            if (btn) btn.classList.add('ativo');
+        }
+
+        function ativarPreset(index) {
+            const p = presets[index];
+            if (!p) return;
+            marcarBotaoPreset(index);
+            const btnTimbre = document.querySelector(`.btn-timbre[data-timbre="${p.timbre}"]`);
+            selecionarTimbre(p.timbre, p.label, btnTimbre, true);
+            document.getElementById('status-midi').innerText = "⚡ Preset P" + (index + 1) + " ativado (" + p.label + ")";
+        }
 
         function garantirAudio() {
             if (!ac) {
@@ -89,12 +214,16 @@
             }
         }
 
-        function selecionarTimbre(nome, botao) {
+        function selecionarTimbre(nome, nomeCurto, botao, veioDePreset = false) {
             garantirAudio();
             timbreAtual = nome;
-            document.querySelectorAll('.grid-timbres button').forEach(b => b.classList.remove('ativo'));
+            nomeCurtoAtual = nomeCurto;
+            document.querySelectorAll('.btn-timbre').forEach(b => b.classList.remove('ativo'));
             if (botao) botao.classList.add('ativo');
-            document.getElementById('status-midi').innerText = "✅ Timbre ativo: " + nome.toUpperCase();
+            if (!veioDePreset) {
+                document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('ativo'));
+                document.getElementById('status-midi').innerText = "🎵 Timbre: " + nomeCurto;
+            }
         }
 
         function midiParaFreq(nota) {
@@ -107,128 +236,3 @@
 
             const agora = ac.currentTime;
             const freq = midiParaFreq(notaMidi);
-            const vol = (velocidade / 127) * 0.4;
-
-            const osc1 = ac.createOscillator();
-            const osc2 = ac.createOscillator();
-            const filtro = ac.createBiquadFilter();
-            const ganho = ac.createGain();
-
-            let attack = 0.01, decay = 0.3, sustain = 0.5, release = 0.4;
-
-            if (timbreAtual === 'piano') {
-                osc1.type = 'triangle';
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(freq * 2, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(2200, agora);
-                attack = 0.005; decay = 0.4; sustain = 0.2; release = 0.5;
-            } else if (timbreAtual === 'rhodes') {
-                osc1.type = 'sine';
-                osc2.type = 'triangle';
-                osc2.frequency.setValueAtTime(freq * 3, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(1400, agora);
-                attack = 0.01; decay = 0.5; sustain = 0.3; release = 0.6;
-            } else if (timbreAtual === 'strings') {
-                osc1.type = 'sawtooth';
-                osc2.type = 'sawtooth';
-                osc1.detune.setValueAtTime(-8, agora);
-                osc2.detune.setValueAtTime(8, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(1800, agora);
-                attack = 0.25; decay = 0.2; sustain = 0.85; release = 0.7;
-            } else if (timbreAtual === 'pad') {
-                osc1.type = 'sawtooth';
-                osc2.type = 'triangle';
-                osc1.detune.setValueAtTime(-12, agora);
-                osc2.detune.setValueAtTime(12, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(900, agora);
-                attack = 0.45; decay = 0.3; sustain = 0.9; release = 1.2;
-            } else if (timbreAtual === 'organ') {
-                osc1.type = 'sine';
-                osc2.type = 'square';
-                osc2.frequency.setValueAtTime(freq * 2, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(2500, agora);
-                attack = 0.01; decay = 0.1; sustain = 0.9; release = 0.15;
-            } else if (timbreAtual === 'bass') {
-                osc1.type = 'sawtooth';
-                osc2.type = 'square';
-                osc1.frequency.setValueAtTime(freq / 2, agora);
-                osc2.frequency.setValueAtTime(freq / 2, agora);
-                filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(600, agora);
-                attack = 0.01; decay = 0.25; sustain = 0.6; release = 0.25;
-            }
-
-            if (timbreAtual !== 'bass') {
-                osc1.frequency.setValueAtTime(freq, agora);
-            }
-            if (timbreAtual === 'strings' || timbreAtual === 'pad') {
-                osc2.frequency.setValueAtTime(freq, agora);
-            }
-
-            const ganhoOsc2 = ac.createGain();
-            ganhoOsc2.gain.setValueAtTime(timbreAtual === 'piano' || timbreAtual === 'rhodes' ? 0.25 : 0.7, agora);
-
-            osc1.connect(filtro);
-            osc2.connect(ganhoOsc2);
-            ganhoOsc2.connect(filtro);
-            filtro.connect(ganho);
-            ganho.connect(ac.destination);
-
-            ganho.gain.setValueAtTime(0.001, agora);
-            ganho.gain.linearRampToValueAtTime(vol, agora + attack);
-            ganho.gain.exponentialRampToValueAtTime(Math.max(vol * sustain, 0.001), agora + attack + decay);
-
-            osc1.start(agora);
-            osc2.start(agora);
-
-            vozesAtivas[notaMidi] = { osc1, osc2, ganho, release };
-        }
-
-        function pararNota(notaMidi) {
-            const voz = vozesAtivas[notaMidi];
-            if (!voz || !ac) return;
-
-            const agora = ac.currentTime;
-            voz.ganho.gain.cancelScheduledValues(agora);
-            voz.ganho.gain.setValueAtTime(Math.max(voz.ganho.gain.value, 0.001), agora);
-            voz.ganho.gain.exponentialRampToValueAtTime(0.0001, agora + voz.release);
-
-            voz.osc1.stop(agora + voz.release + 0.05);
-            voz.osc2.stop(agora + voz.release + 0.05);
-            delete vozesAtivas[notaMidi];
-        }
-
-        if (navigator.requestMIDIAccess) {
-            navigator.requestMIDIAccess().then(function(midiAccess) {
-                for (let input of midiAccess.inputs.values()) {
-                    document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + input.name;
-                    input.onmidimessage = receberMensagemMIDI;
-                }
-                midiAccess.onstatechange = (e) => {
-                    if (e.port.type === "input" && e.port.state === "connected") {
-                        document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + e.port.name;
-                        e.port.onmidimessage = receberMensagemMIDI;
-                    }
-                };
-            }).catch(() => {});
-        }
-
-        function receberMensagemMIDI(mensagem) {
-            const comando = mensagem.data.at(0);
-            const nota = mensagem.data.at(1);
-            const velocidade = (mensagem.data.length > 2) ? mensagem.data.at(2) : 0;
-
-            if (comando >= 144 && comando <= 159 && velocidade > 0) {
-                tocarNota(nota, velocidade);
-            } else if ((comando >= 128 && comando <= 143) || (comando >= 144 && comando <= 159 && velocidade === 0)) {
-                pararNota(nota);
-            }
-        }
-    </script>
-</body>
-</html>
