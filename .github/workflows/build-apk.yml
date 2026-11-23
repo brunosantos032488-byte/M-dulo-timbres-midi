@@ -23,11 +23,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Instalar Capacitor e criar projeto Android
+      - name: Instalar Capacitor e preparar Android
         run: |
           npm install
           npx cap init "Modulo Timbres" "com.teclado.timbres" --web-dir=www
           npx cap add android
+          npx cap sync android
 
       - name: Compilar o APK
         run: |
@@ -38,5 +39,5 @@ jobs:
       - name: Disponibilizar APK para download
         uses: actions/upload-artifact@v4
         with:
-          name: app-timbres-debug
+          name: app-timbres-novo
           path: android/app/build/outputs/apk/debug/app-debug.apk
