@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Módulo de Timbres Pro</title>
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
         body {
             font-family: sans-serif;
             background-color: #121212;
@@ -17,12 +13,8 @@
             padding: 12px;
             margin: 0;
             user-select: none;
-            -webkit-user-select: none;
         }
-        h2 {
-            margin: 4px 0 8px 0;
-            font-size: 18px;
-        }
+        h2 { margin: 4px 0 8px 0; font-size: 18px; }
         .status {
             background: #1e1e1e;
             padding: 10px;
@@ -36,7 +28,7 @@
             background-color: #1b5e20;
             color: #ffffff;
             border: 1px solid #4caf50;
-            padding: 10px 14px;
+            padding: 10px;
             font-size: 13px;
             border-radius: 8px;
             font-weight: bold;
@@ -48,7 +40,6 @@
             font-size: 11px;
             color: #aaa;
             text-transform: uppercase;
-            letter-spacing: 1px;
             margin: 8px 0 6px 0;
         }
         .grid-presets {
@@ -100,11 +91,6 @@
             margin: 0 auto;
             border: 1px solid #2c2c2c;
         }
-        .teste-notas p {
-            margin: 0 0 8px 0;
-            font-size: 13px;
-            color: #bbb;
-        }
         .btn-nota {
             background-color: #333;
             color: #fff;
@@ -115,152 +101,151 @@
             padding: 16px 18px;
             margin: 0 3px;
         }
-        .btn-nota:active {
-            background-color: #00c853;
-            color: #000;
-        }
     </style>
 </head>
 <body>
 
     <h2>🎹 Módulo de Timbres Pro</h2>
-    <div id="status-midi" class="status">✅ Toque em qualquer botão abaixo!</div>
-    <button type="button" class="btn-midi" onclick="ativarMIDI()">🔌 Conectar Teclado USB (MIDI)</button>
+    <div id="status-midi" class="status">✅ Pronto! Toque em qualquer botão abaixo.</div>
+    <button class="btn-midi" onclick="ativarMIDI()">🔌 Conectar Teclado USB (MIDI)</button>
 
-    <div class="secao-titulo">⚡ Presets Rápidos (Toque para ativar)</div>
+    <div class="secao-titulo">⚡ Presets Rápidos</div>
     <div class="grid-presets">
-        <button type="button" class="btn-preset ativo" id="preset-0" onclick="clicarPreset(0)">P1<br><span id="lbl-p0">Piano</span></button>
-        <button type="button" class="btn-preset" id="preset-1" onclick="clicarPreset(1)">P2<br><span id="lbl-p1">Rhodes</span></button>
-        <button type="button" class="btn-preset" id="preset-2" onclick="clicarPreset(2)">P3<br><span id="lbl-p2">Pad</span></button>
-        <button type="button" class="btn-preset" id="preset-3" onclick="clicarPreset(3)">P4<br><span id="lbl-p3">Brass</span></button>
+        <button class="btn-preset ativo" id="p0" onclick="usarPreset(0)">P1<br>Piano</button>
+        <button class="btn-preset" id="p1" onclick="usarPreset(1)">P2<br>Rhodes</button>
+        <button class="btn-preset" id="p2" onclick="usarPreset(2)">P3<br>Pad</button>
+        <button class="btn-preset" id="p3" onclick="usarPreset(3)">P4<br>Brass</button>
     </div>
 
     <div class="secao-titulo">🎛️ Banco de Timbres (10 Sons)</div>
     <div class="grid-timbres">
-        <button type="button" class="btn-timbre ativo" id="timbre-piano" onclick="escolherTimbre('piano', 'Piano', this)">🎹 Piano Acústico</button>
-        <button type="button" class="btn-timbre" id="timbre-bright_piano" onclick="escolherTimbre('bright_piano', 'B.Piano', this)">✨ Bright Piano</button>
-        <button type="button" class="btn-timbre" id="timbre-rhodes" onclick="escolherTimbre('rhodes', 'Rhodes', this)">⚡ Rhodes / E.Piano</button>
-        <button type="button" class="btn-timbre" id="timbre-bells" onclick="escolherTimbre('bells', 'Bells', this)">🔔 Crystal Bells</button>
-        <button type="button" class="btn-timbre" id="timbre-strings" onclick="escolherTimbre('strings', 'Strings', this)">🎻 Strings (Cordas)</button>
-        <button type="button" class="btn-timbre" id="timbre-pad" onclick="escolherTimbre('pad', 'Pad', this)">☁️ Warm Pad</button>
-        <button type="button" class="btn-timbre" id="timbre-organ" onclick="escolherTimbre('organ', 'Órgão', this)">⛪ Órgão Gospel</button>
-        <button type="button" class="btn-timbre" id="timbre-brass" onclick="escolherTimbre('brass', 'Brass', this)">🎺 Brass / Metais</button>
-        <button type="button" class="btn-timbre" id="timbre-lead" onclick="escolherTimbre('lead', 'Lead', this)">🚀 Synth Lead</button>
-        <button type="button" class="btn-timbre" id="timbre-bass" onclick="escolherTimbre('bass', 'Bass', this)">🎸 Sub / Synth Bass</button>
+        <button class="btn-timbre ativo" id="t-piano" onclick="mudarTimbre('piano', 'Piano')">🎹 Piano Acústico</button>
+        <button class="btn-timbre" id="t-bright" onclick="mudarTimbre('bright', 'Bright Piano')">✨ Bright Piano</button>
+        <button class="btn-timbre" id="t-rhodes" onclick="mudarTimbre('rhodes', 'Rhodes')">⚡ Rhodes / E.Piano</button>
+        <button class="btn-timbre" id="t-bells" onclick="mudarTimbre('bells', 'Crystal Bells')">🔔 Crystal Bells</button>
+        <button class="btn-timbre" id="t-strings" onclick="mudarTimbre('strings', 'Strings')">🎻 Strings (Cordas)</button>
+        <button class="btn-timbre" id="t-pad" onclick="mudarTimbre('pad', 'Warm Pad')">☁️ Warm Pad</button>
+        <button class="btn-timbre" id="t-organ" onclick="mudarTimbre('organ', 'Órgão Gospel')">⛪ Órgão Gospel</button>
+        <button class="btn-timbre" id="t-brass" onclick="mudarTimbre('brass', 'Brass')">🎺 Brass / Metais</button>
+        <button class="btn-timbre" id="t-lead" onclick="mudarTimbre('lead', 'Synth Lead')">🚀 Synth Lead</button>
+        <button class="btn-timbre" id="t-bass" onclick="mudarTimbre('bass', 'Synth Bass')">🎸 Sub / Synth Bass</button>
     </div>
 
     <div class="teste-notas">
-        <p>Testar som na tela (toque para soar):</p>
-        <button type="button" class="btn-nota" onclick="tocarPulso(60)">Dó (C4)</button>
-        <button type="button" class="btn-nota" onclick="tocarPulso(64)">Mi (E4)</button>
-        <button type="button" class="btn-nota" onclick="tocarPulso(67)">Sol (G4)</button>
+        <p style="margin:0 0 8px 0; font-size:13px; color:#bbb;">Testar som na tela:</p>
+        <button class="btn-nota" onclick="tocarTeste(60)">Dó (C4)</button>
+        <button class="btn-nota" onclick="tocarTeste(64)">Mi (E4)</button>
+        <button class="btn-nota" onclick="tocarTeste(67)">Sol (G4)</button>
     </div>
 
     <script>
         var ac = null;
         var timbreAtual = 'piano';
-        var nomeCurtoAtual = 'Piano';
-        var vozesAtivas = {};
+        var nomeAtual = 'Piano';
+        var vozes = {};
 
-        var presets = {
-            p0: { timbre: 'piano', label: 'Piano' },
-            p1: { timbre: 'rhodes', label: 'Rhodes' },
-            p2: { timbre: 'pad', label: 'Pad' },
-            p3: { timbre: 'brass', label: 'Brass' }
-        };
-
-        function setStatus(msg) {
-            var el = document.getElementById('status-midi');
-            if (el) el.innerText = msg;
+        function msg(texto) {
+            document.getElementById('status-midi').innerText = texto;
         }
 
-        function garantirAudio() {
-            try {
-                if (!ac) {
-                    var AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    ac = new AudioCtx();
-                }
-                if (ac.state === 'suspended') {
-                    ac.resume();
-                }
-            } catch (e) {
-                setStatus("❌ Erro áudio: " + e.message);
+        function ligarAudio() {
+            if (!ac) {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                ac = new Ctx();
+            }
+            if (ac.state === 'suspended') {
+                ac.resume();
             }
         }
 
-        function escolherTimbre(id, nome, botao) {
-            setStatus("🎵 Timbre selecionado: " + nome);
-            garantirAudio();
+        function limparBotoes() {
+            document.getElementById('t-piano').className = 'btn-timbre';
+            document.getElementById('t-bright').className = 'btn-timbre';
+            document.getElementById('t-rhodes').className = 'btn-timbre';
+            document.getElementById('t-bells').className = 'btn-timbre';
+            document.getElementById('t-strings').className = 'btn-timbre';
+            document.getElementById('t-pad').className = 'btn-timbre';
+            document.getElementById('t-organ').className = 'btn-timbre';
+            document.getElementById('t-brass').className = 'btn-timbre';
+            document.getElementById('t-lead').className = 'btn-timbre';
+            document.getElementById('t-bass').className = 'btn-timbre';
+        }
+
+        function limparPresets() {
+            document.getElementById('p0').className = 'btn-preset';
+            document.getElementById('p1').className = 'btn-preset';
+            document.getElementById('p2').className = 'btn-preset';
+            document.getElementById('p3').className = 'btn-preset';
+        }
+
+        function mudarTimbre(id, nome) {
+            ligarAudio();
             timbreAtual = id;
-            nomeCurtoAtual = nome;
+            nomeAtual = nome;
+            limparBotoes();
+            limparPresets();
+            document.getElementById('t-' + id).className = 'btn-timbre ativo';
+            msg('🎵 Timbre: ' + nome);
+        }
 
-            var todos = document.querySelectorAll('.btn-timbre');
-            todos.forEach(function(b) { b.classList.remove('ativo'); });
+        function usarPreset(num) {
+            ligarAudio();
+            limparBotoes();
+            limparPresets();
+            document.getElementById('p' + num).className = 'btn-preset ativo';
 
-            if (botao) {
-                botao.classList.add('ativo');
-            } else {
-                var alvo = document.getElementById('timbre-' + id);
-                if (alvo) alvo.classList.add('ativo');
+            if (num === 0) {
+                timbreAtual = 'piano'; nomeAtual = 'Piano';
+                document.getElementById('t-piano').className = 'btn-timbre ativo';
+            } else if (num === 1) {
+                timbreAtual = 'rhodes'; nomeAtual = 'Rhodes';
+                document.getElementById('t-rhodes').className = 'btn-timbre ativo';
+            } else if (num === 2) {
+                timbreAtual = 'pad'; nomeAtual = 'Warm Pad';
+                document.getElementById('t-pad').className = 'btn-timbre ativo';
+            } else if (num === 3) {
+                timbreAtual = 'brass'; nomeAtual = 'Brass';
+                document.getElementById('t-brass').className = 'btn-timbre ativo';
             }
-
-            var btnsP = document.querySelectorAll('.btn-preset');
-            btnsP.forEach(function(b) { b.classList.remove('ativo'); });
+            msg('⚡ Preset P' + (num + 1) + ': ' + nomeAtual);
         }
 
-        function clicarPreset(index) {
-            var chave = 'p' + index;
-            var p = presets[chave];
-            if (!p) return;
-
-            escolherTimbre(p.timbre, p.label, null);
-
-            var btnsP = document.querySelectorAll('.btn-preset');
-            btnsP.forEach(function(b) { b.classList.remove('ativo'); });
-            var btn = document.getElementById('preset-' + index);
-            if (btn) btn.classList.add('ativo');
-
-            setStatus("⚡ Preset P" + (index + 1) + " ativo (" + p.label + ")");
+        function tocarTeste(nota) {
+            msg('🔊 Tocando ' + nomeAtual + '...');
+            tocarNota(nota, 115);
+            setTimeout(function() { pararNota(nota); }, 600);
         }
 
-        function tocarPulso(notaMidi) {
-            setStatus("🔊 Tocando nota MIDI " + notaMidi + " (" + nomeCurtoAtual + ")");
-            tocarNota(notaMidi, 115);
-            setTimeout(function() {
-                pararNota(notaMidi);
-            }, 650);
-        }
-
-        function midiParaFreq(nota) {
-            return 440 * Math.pow(2, (nota - 69) / 12);
-        }
-
-        function tocarNota(notaMidi, velocidade) {
-            garantirAudio();
-            if (!ac) return;
-            if (vozesAtivas[notaMidi]) pararNota(notaMidi);
+        function tocarNota(nota, vel) {
+            ligarAudio();
+            if (vozes[nota]) pararNota(nota);
 
             var agora = ac.currentTime;
-            var freq = midiParaFreq(notaMidi);
-            var vol = ((velocidade || 100) / 127) * 0.5;
+            var freq = 440 * Math.pow(2, (nota - 69) / 12);
+            var vol = (vel / 127) * 0.5;
 
             var osc1 = ac.createOscillator();
             var osc2 = ac.createOscillator();
             var filtro = ac.createBiquadFilter();
             var ganho = ac.createGain();
 
-            var attack = 0.01, decay = 0.3, sustain = 0.5, release = 0.4;
-            var mixOsc2 = 0.4;
+            var atk = 0.01, dec = 0.3, sus = 0.5, rel = 0.4, mix = 0.4;
 
             osc1.frequency.setValueAtTime(freq, agora);
             osc2.frequency.setValueAtTime(freq, agora);
             filtro.type = 'lowpass';
 
             if (timbreAtual === 'piano') {
-                osc1.type = 'triangle';
-                osc2.type = 'sine';
+                osc1.type = 'triangle'; osc2.type = 'sine';
                 osc2.frequency.setValueAtTime(freq * 2, agora);
                 filtro.frequency.setValueAtTime(2200, agora);
-                attack = 0.005; decay = 0.45; sustain = 0.25; release = 0.5;
-                mixOsc2 = 0.25;
-            } else if (timbreAtual === 'bright_piano') {
+                atk = 0.005; dec = 0.45; sus = 0.25; rel = 0.5; mix = 0.25;
+            } else if (timbreAtual === 'bright') {
+                osc1.type = 'sawtooth'; osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(freq * 2, agora);
+                filtro.frequency.setValueAtTime(3400, agora);
+                atk = 0.004; dec = 0.4; sus = 0.3; rel = 0.45; mix = 0.5;
+            } else if (timbreAtual === 'rhodes') {
+                osc1.type = 'sine'; osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(freq * 3, agora);
+                filtro.frequency.setValueAtTime(1400, agora);
