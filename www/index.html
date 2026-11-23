@@ -1,4 +1,157 @@
-function receberMensagemMIDI(mensagem) {
-    const comando = mensagem.data[0];
-    const nota = mensagem.data[1];
-    const velocidade = (mensagem.data.length > 2) ? mensagem.data[2] : 0;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Módulo de Timbres MIDI</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            user-select: none;
+        }
+        .status {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #00e676;
+            border: 1px solid #333;
+        }
+        .grid-timbres {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+        }
+        button {
+            background-color: #2c2c2c;
+            color: white;
+            border: 2px solid #444;
+            padding: 20px 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button.ativo {
+            background-color: #0066cc;
+            border-color: #3399ff;
+        }
+        .teste-notas button {
+            background-color: #333;
+            padding: 18px 22px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎹 Módulo de Timbres</h2>
+    <div id="status-midi" class="status">Iniciando áudio...</div>
+
+    <h3>Escolha o Timbre:</h3>
+    <div class="grid-timbres">
+        <button onclick="carregarTimbre('acoustic_grand_piano', this)" class="ativo">🎹 Piano Acústico</button>
+        <button onclick="carregarTimbre('electric_piano_1', this)">⚡ Rhodes / E.Piano</button>
+        <button onclick="carregarTimbre('string_ensemble_1', this)">🎻 Strings (Cordas)</button>
+        <button onclick="carregarTimbre('pad_2_warm', this)">☁️ Warm Pad</button>
+        <button onclick="carregarTimbre('church_organ', this)">⛪ Órgão</button>
+        <button onclick="carregarTimbre('synth_bass_1', this)">🎸 Synth Bass</button>
+    </div>
+
+    <div class="teste-notas">
+        <p>Testar som na tela:</p>
+        <button ontouchstart="tocarNota(60)" ontouchend="pararNota(60)" onmousedown="tocarNota(60)" onmouseup="pararNota(60)">Dó (C4)</button>
+        <button ontouchstart="tocarNota(64)" ontouchend="pararNota(64)" onmousedown="tocarNota(64)" onmouseup="pararNota(64)">Mi (E4)</button>
+        <button ontouchstart="tocarNota(67)" ontouchend="pararNota(67)" onmousedown="tocarNota(67)" onmouseup="pararNota(67)">Sol (G4)</button>
+    </div>
+
+    <script>
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ac = new AudioContext();
+        let instrumentoAtual = null;
+        let notasAtivas = {};
+
+        function carregarTimbre(nomeInstrumento, botaoElement) {
+            if (botaoElement) {
+                document.querySelectorAll('.grid-timbres button').forEach(b => b.classList.remove('ativo'));
+                botaoElement.classList.add('ativo');
+            }
+
+            document.getElementById('status-midi').innerText = "Carregando timbre: " + nomeInstrumento + "...";
+
+            Soundfont.instrument(ac, nomeInstrumento).then(function (inst) {
+                instrumentoAtual = inst;
+                document.getElementById('status-midi').innerText = "✅ Timbre pronto! Conecte o teclado ou toque abaixo.";
+            }).catch(function(err) {
+                document.getElementById('status-midi').innerText = "❌ Erro ao baixar timbre (verifique a internet).";
+            });
+        }
+
+        carregarTimbre('acoustic_grand_piano', null);
+
+        function tocarNota(notaMidi, velocidade = 100) {
+            if (ac.state === 'suspended') ac.resume();
+            if (!instrumentoAtual) return;
+            
+            if (notasAtivas[notaMidi]) notasAtivas[notaMidi].stop();
+            
+            const ganho = velocidade / 127;
+            notasAtivas[notaMidi] = instrumentoAtual.play(notaMidi, ac.currentTime, { gain: ganho });
+        }
+
+        function pararNota(notaMidi) {
+            if (notasAtivas[notaMidi]) {
+                notasAtivas[notaMidi].stop();
+                delete notasAtivas[notaMidi];
+            }
+        }
+
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+        } else {
+            document.getElementById('status-midi').innerText = "⚠️ Web MIDI não detectado. Use os botões abaixo para testar.";
+        }
+
+        function onMIDISuccess(midiAccess) {
+            const inputs = midiAccess.inputs.values();
+
+            for (let input of inputs) {
+                document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + input.name;
+                input.onmidimessage = receberMensagemMIDI;
+            }
+
+            midiAccess.onstatechange = (e) => {
+                if (e.port.type === "input" && e.port.state === "connected") {
+                    document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + e.port.name;
+                    e.port.onmidimessage = receberMensagemMIDI;
+                }
+            };
+        }
+
+        function onMIDIFailure() {
+            document.getElementById('status-midi').innerText = "❌ Falha ao acessar portas MIDI.";
+        }
+
+        function receberMensagemMIDI(mensagem) {
+            const comando = mensagem.data[0];
+            const nota = mensagem.data[1];
+            const velocidade = (mensagem.data.length > 2) ? mensagem.data[2] : 0;
+
+            if (comando >= 144 && comando <= 159 && velocidade > 0) {
+                tocarNota(nota, velocidade);
+            } else if ((comando >= 128 && comando <= 143) || (comando >= 144 && comando <= 159 && velocidade === 0)) {
+                pararNota(nota);
+            }
+        }
+    </script>
+</body>
+</html>
