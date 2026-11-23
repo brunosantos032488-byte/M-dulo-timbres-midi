@@ -106,7 +106,7 @@
 <body>
 
     <h2>🎹 Módulo de Timbres Pro</h2>
-    <div id="status-midi" class="status">✅ Pronto! Toque em qualquer botão abaixo.</div>
+    <div id="status-midi" class="status">✅ Toque em qualquer botão abaixo!</div>
     <button class="btn-midi" onclick="ativarMIDI()">🔌 Conectar Teclado USB (MIDI)</button>
 
     <div class="secao-titulo">⚡ Presets Rápidos</div>
@@ -158,62 +158,49 @@
             }
         }
 
-        function limparBotoes() {
-            document.getElementById('t-piano').className = 'btn-timbre';
-            document.getElementById('t-bright').className = 'btn-timbre';
-            document.getElementById('t-rhodes').className = 'btn-timbre';
-            document.getElementById('t-bells').className = 'btn-timbre';
-            document.getElementById('t-strings').className = 'btn-timbre';
-            document.getElementById('t-pad').className = 'btn-timbre';
-            document.getElementById('t-organ').className = 'btn-timbre';
-            document.getElementById('t-brass').className = 'btn-timbre';
-            document.getElementById('t-lead').className = 'btn-timbre';
-            document.getElementById('t-bass').className = 'btn-timbre';
-        }
-
-        function limparPresets() {
-            document.getElementById('p0').className = 'btn-preset';
-            document.getElementById('p1').className = 'btn-preset';
-            document.getElementById('p2').className = 'btn-preset';
-            document.getElementById('p3').className = 'btn-preset';
-        }
-
         function mudarTimbre(id, nome) {
-            ligarAudio();
-            timbreAtual = id;
-            nomeAtual = nome;
-            limparBotoes();
-            limparPresets();
-            document.getElementById('t-' + id).className = 'btn-timbre ativo';
-            msg('🎵 Timbre: ' + nome);
+            try {
+                timbreAtual = id;
+                nomeAtual = nome;
+                var lista = document.querySelectorAll('.btn-timbre');
+                for (var i = 0; i < lista.length; i++) {
+                    lista.item(i).className = 'btn-timbre';
+                }
+                var presets = document.querySelectorAll('.btn-preset');
+                for (var j = 0; j < presets.length; j++) {
+                    presets.item(j).className = 'btn-preset';
+                }
+                document.getElementById('t-' + id).className = 'btn-timbre ativo';
+                msg('🎵 Timbre: ' + nome);
+                ligarAudio();
+            } catch (e) {
+                msg('Erro: ' + e.message);
+            }
         }
 
         function usarPreset(num) {
-            ligarAudio();
-            limparBotoes();
-            limparPresets();
-            document.getElementById('p' + num).className = 'btn-preset ativo';
-
-            if (num === 0) {
-                timbreAtual = 'piano'; nomeAtual = 'Piano';
-                document.getElementById('t-piano').className = 'btn-timbre ativo';
-            } else if (num === 1) {
-                timbreAtual = 'rhodes'; nomeAtual = 'Rhodes';
-                document.getElementById('t-rhodes').className = 'btn-timbre ativo';
-            } else if (num === 2) {
-                timbreAtual = 'pad'; nomeAtual = 'Warm Pad';
-                document.getElementById('t-pad').className = 'btn-timbre ativo';
-            } else if (num === 3) {
-                timbreAtual = 'brass'; nomeAtual = 'Brass';
-                document.getElementById('t-brass').className = 'btn-timbre ativo';
+            try {
+                if (num === 0) mudarTimbre('piano', 'Piano');
+                if (num === 1) mudarTimbre('rhodes', 'Rhodes');
+                if (num === 2) mudarTimbre('pad', 'Warm Pad');
+                if (num === 3) mudarTimbre('brass', 'Brass');
+                document.getElementById('p' + num).className = 'btn-preset ativo';
+                msg('⚡ Preset P' + (num + 1) + ': ' + nomeAtual);
+            } catch (e) {
+                msg('Erro preset: ' + e.message);
             }
-            msg('⚡ Preset P' + (num + 1) + ': ' + nomeAtual);
         }
+    </script>
 
+    <script>
         function tocarTeste(nota) {
-            msg('🔊 Tocando ' + nomeAtual + '...');
-            tocarNota(nota, 115);
-            setTimeout(function() { pararNota(nota); }, 600);
+            try {
+                msg('🔊 Tocando ' + nomeAtual + '...');
+                tocarNota(nota, 115);
+                setTimeout(function() { pararNota(nota); }, 600);
+            } catch (e) {
+                msg('Erro som: ' + e.message);
+            }
         }
 
         function tocarNota(nota, vel) {
@@ -249,3 +236,18 @@
                 osc1.type = 'sine'; osc2.type = 'triangle';
                 osc2.frequency.setValueAtTime(freq * 3, agora);
                 filtro.frequency.setValueAtTime(1400, agora);
+                atk = 0.01; dec = 0.55; sus = 0.35; rel = 0.6; mix = 0.22;
+            } else if (timbreAtual === 'bells') {
+                osc1.type = 'sine'; osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(freq * 4, agora);
+                filtro.frequency.setValueAtTime(4500, agora);
+                atk = 0.005; dec = 0.8; sus = 0.15; rel = 1.1; mix = 0.35;
+            } else if (timbreAtual === 'strings') {
+                osc1.type = 'sawtooth'; osc2.type = 'sawtooth';
+                osc1.detune.setValueAtTime(-9, agora);
+                osc2.detune.setValueAtTime(9, agora);
+                filtro.frequency.setValueAtTime(1800, agora);
+                atk = 0.2; dec = 0.2; sus = 0.85; rel = 0.7; mix = 0.8;
+            } else if (timbreAtual === 'pad') {
+                osc1.type = 'sawtooth'; osc2.type = 'triangle';
+                osc1.detune.setValueAtTime(-14, agora);
