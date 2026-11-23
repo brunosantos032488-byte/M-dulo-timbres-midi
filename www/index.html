@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Módulo de Timbres MIDI</title>
-    <script src="https://jsdelivr.net"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -40,6 +39,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            touch-action: manipulation;
         }
         button.ativo {
             background-color: #0066cc;
@@ -54,97 +54,174 @@
 </head>
 <body>
 
-    <h2>🎹 Módulo de Timbres</h2>
-    <div id="status-midi" class="status">Iniciando áudio...</div>
+    <h2>🎹 Módulo de Timbres (Offline)</h2>
+    <div id="status-midi" class="status">✅ Pronto! Toque em uma nota abaixo ou conecte o teclado.</div>
 
     <h3>Escolha o Timbre:</h3>
     <div class="grid-timbres">
-        <button onclick="carregarTimbre('acoustic_grand_piano', this)" class="ativo">🎹 Piano Acústico</button>
-        <button onclick="carregarTimbre('electric_piano_1', this)">⚡ Rhodes / E.Piano</button>
-        <button onclick="carregarTimbre('string_ensemble_1', this)">🎻 Strings (Cordas)</button>
-        <button onclick="carregarTimbre('pad_2_warm', this)">☁️ Warm Pad</button>
-        <button onclick="carregarTimbre('church_organ', this)">⛪ Órgão</button>
-        <button onclick="carregarTimbre('synth_bass_1', this)">🎸 Synth Bass</button>
+        <button onclick="selecionarTimbre('piano', this)" class="ativo">🎹 Piano</button>
+        <button onclick="selecionarTimbre('rhodes', this)">⚡ Rhodes / E.Piano</button>
+        <button onclick="selecionarTimbre('strings', this)">🎻 Strings (Cordas)</button>
+        <button onclick="selecionarTimbre('pad', this)">☁️ Warm Pad</button>
+        <button onclick="selecionarTimbre('organ', this)">⛪ Órgão</button>
+        <button onclick="selecionarTimbre('bass', this)">🎸 Synth Bass</button>
     </div>
 
     <div class="teste-notas">
         <p>Testar som na tela:</p>
-        <button ontouchstart="tocarNota(60)" ontouchend="pararNota(60)" onmousedown="tocarNota(60)" onmouseup="pararNota(60)">Dó (C4)</button>
-        <button ontouchstart="tocarNota(64)" ontouchend="pararNota(64)" onmousedown="tocarNota(64)" onmouseup="pararNota(64)">Mi (E4)</button>
-        <button ontouchstart="tocarNota(67)" ontouchend="pararNota(67)" onmousedown="tocarNota(67)" onmouseup="pararNota(67)">Sol (G4)</button>
+        <button ontouchstart="tocarNota(60); event.preventDefault();" ontouchend="pararNota(60)" onmousedown="tocarNota(60)" onmouseup="pararNota(60)">Dó (C4)</button>
+        <button ontouchstart="tocarNota(64); event.preventDefault();" ontouchend="pararNota(64)" onmousedown="tocarNota(64)" onmouseup="pararNota(64)">Mi (E4)</button>
+        <button ontouchstart="tocarNota(67); event.preventDefault();" ontouchend="pararNota(67)" onmousedown="tocarNota(67)" onmouseup="pararNota(67)">Sol (G4)</button>
     </div>
 
     <script>
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const ac = new AudioContext();
-        let instrumentoAtual = null;
-        let notasAtivas = {};
+        let ac = null;
+        let timbreAtual = 'piano';
+        let vozesAtivas = {};
 
-        function carregarTimbre(nomeInstrumento, botaoElement) {
-            if (botaoElement) {
-                document.querySelectorAll('.grid-timbres button').forEach(b => b.classList.remove('ativo'));
-                botaoElement.classList.add('ativo');
+        function garantirAudio() {
+            if (!ac) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                ac = new AudioContext();
             }
-
-            document.getElementById('status-midi').innerText = "Carregando timbre: " + nomeInstrumento + "...";
-
-            Soundfont.instrument(ac, nomeInstrumento).then(function (inst) {
-                instrumentoAtual = inst;
-                document.getElementById('status-midi').innerText = "✅ Timbre pronto! Conecte o teclado ou toque abaixo.";
-            }).catch(function(err) {
-                document.getElementById('status-midi').innerText = "❌ Erro ao baixar timbre (verifique a internet).";
-            });
+            if (ac.state === 'suspended') {
+                ac.resume();
+            }
         }
 
-        carregarTimbre('acoustic_grand_piano', null);
+        function selecionarTimbre(nome, botao) {
+            garantirAudio();
+            timbreAtual = nome;
+            document.querySelectorAll('.grid-timbres button').forEach(b => b.classList.remove('ativo'));
+            if (botao) botao.classList.add('ativo');
+            document.getElementById('status-midi').innerText = "✅ Timbre ativo: " + nome.toUpperCase();
+        }
+
+        function midiParaFreq(nota) {
+            return 440 * Math.pow(2, (nota - 69) / 12);
+        }
 
         function tocarNota(notaMidi, velocidade = 100) {
-            if (ac.state === 'suspended') ac.resume();
-            if (!instrumentoAtual) return;
-            
-            if (notasAtivas[notaMidi]) notasAtivas[notaMidi].stop();
-            
-            const ganho = velocidade / 127;
-            notasAtivas[notaMidi] = instrumentoAtual.play(notaMidi, ac.currentTime, { gain: ganho });
+            garantirAudio();
+            if (vozesAtivas[notaMidi]) pararNota(notaMidi);
+
+            const agora = ac.currentTime;
+            const freq = midiParaFreq(notaMidi);
+            const vol = (velocidade / 127) * 0.4;
+
+            const osc1 = ac.createOscillator();
+            const osc2 = ac.createOscillator();
+            const filtro = ac.createBiquadFilter();
+            const ganho = ac.createGain();
+
+            let attack = 0.01, decay = 0.3, sustain = 0.5, release = 0.4;
+
+            if (timbreAtual === 'piano') {
+                osc1.type = 'triangle';
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(freq * 2, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(2200, agora);
+                attack = 0.005; decay = 0.4; sustain = 0.2; release = 0.5;
+            } else if (timbreAtual === 'rhodes') {
+                osc1.type = 'sine';
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(freq * 3, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(1400, agora);
+                attack = 0.01; decay = 0.5; sustain = 0.3; release = 0.6;
+            } else if (timbreAtual === 'strings') {
+                osc1.type = 'sawtooth';
+                osc2.type = 'sawtooth';
+                osc1.detune.setValueAtTime(-8, agora);
+                osc2.detune.setValueAtTime(8, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(1800, agora);
+                attack = 0.25; decay = 0.2; sustain = 0.85; release = 0.7;
+            } else if (timbreAtual === 'pad') {
+                osc1.type = 'sawtooth';
+                osc2.type = 'triangle';
+                osc1.detune.setValueAtTime(-12, agora);
+                osc2.detune.setValueAtTime(12, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(900, agora);
+                attack = 0.45; decay = 0.3; sustain = 0.9; release = 1.2;
+            } else if (timbreAtual === 'organ') {
+                osc1.type = 'sine';
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(freq * 2, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(2500, agora);
+                attack = 0.01; decay = 0.1; sustain = 0.9; release = 0.15;
+            } else if (timbreAtual === 'bass') {
+                osc1.type = 'sawtooth';
+                osc2.type = 'square';
+                osc1.frequency.setValueAtTime(freq / 2, agora);
+                osc2.frequency.setValueAtTime(freq / 2, agora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(600, agora);
+                attack = 0.01; decay = 0.25; sustain = 0.6; release = 0.25;
+            }
+
+            if (timbreAtual !== 'bass') {
+                osc1.frequency.setValueAtTime(freq, agora);
+            }
+            if (timbreAtual === 'strings' || timbreAtual === 'pad') {
+                osc2.frequency.setValueAtTime(freq, agora);
+            }
+
+            const ganhoOsc2 = ac.createGain();
+            ganhoOsc2.gain.setValueAtTime(timbreAtual === 'piano' || timbreAtual === 'rhodes' ? 0.25 : 0.7, agora);
+
+            osc1.connect(filtro);
+            osc2.connect(ganhoOsc2);
+            ganhoOsc2.connect(filtro);
+            filtro.connect(ganho);
+            ganho.connect(ac.destination);
+
+            ganho.gain.setValueAtTime(0.001, agora);
+            ganho.gain.linearRampToValueAtTime(vol, agora + attack);
+            ganho.gain.exponentialRampToValueAtTime(Math.max(vol * sustain, 0.001), agora + attack + decay);
+
+            osc1.start(agora);
+            osc2.start(agora);
+
+            vozesAtivas[notaMidi] = { osc1, osc2, ganho, release };
         }
 
         function pararNota(notaMidi) {
-            if (notasAtivas[notaMidi]) {
-                notasAtivas[notaMidi].stop();
-                delete notasAtivas[notaMidi];
-            }
+            const voz = vozesAtivas[notaMidi];
+            if (!voz || !ac) return;
+
+            const agora = ac.currentTime;
+            voz.ganho.gain.cancelScheduledValues(agora);
+            voz.ganho.gain.setValueAtTime(Math.max(voz.ganho.gain.value, 0.001), agora);
+            voz.ganho.gain.exponentialRampToValueAtTime(0.0001, agora + voz.release);
+
+            voz.osc1.stop(agora + voz.release + 0.05);
+            voz.osc2.stop(agora + voz.release + 0.05);
+            delete vozesAtivas[notaMidi];
         }
 
         if (navigator.requestMIDIAccess) {
-            navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-        } else {
-            document.getElementById('status-midi').innerText = "⚠️ Web MIDI não detectado. Use os botões abaixo para testar.";
-        }
-
-        function onMIDISuccess(midiAccess) {
-            const inputs = midiAccess.inputs.values();
-
-            for (let input of inputs) {
-                document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + input.name;
-                input.onmidimessage = receberMensagemMIDI;
-            }
-
-            midiAccess.onstatechange = (e) => {
-                if (e.port.type === "input" && e.port.state === "connected") {
-                    document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + e.port.name;
-                    e.port.onmidimessage = receberMensagemMIDI;
+            navigator.requestMIDIAccess().then(function(midiAccess) {
+                for (let input of midiAccess.inputs.values()) {
+                    document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + input.name;
+                    input.onmidimessage = receberMensagemMIDI;
                 }
-            };
-        }
-
-        function onMIDIFailure() {
-            document.getElementById('status-midi').innerText = "❌ Falha ao acessar portas MIDI.";
+                midiAccess.onstatechange = (e) => {
+                    if (e.port.type === "input" && e.port.state === "connected") {
+                        document.getElementById('status-midi').innerText = "🎹 Teclado conectado: " + e.port.name;
+                        e.port.onmidimessage = receberMensagemMIDI;
+                    }
+                };
+            }).catch(() => {});
         }
 
         function receberMensagemMIDI(mensagem) {
-            const comando = mensagem.data[0];
-            const nota = mensagem.data[1];
-            const velocidade = (mensagem.data.length > 2) ? mensagem.data[2] : 0;
+            const comando = mensagem.data.at(0);
+            const nota = mensagem.data.at(1);
+            const velocidade = (mensagem.data.length > 2) ? mensagem.data.at(2) : 0;
 
             if (comando >= 144 && comando <= 159 && velocidade > 0) {
                 tocarNota(nota, velocidade);
