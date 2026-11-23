@@ -1,0 +1,14 @@
+{
+  "name": "modulo-timbres",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Pronto para empacotar'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
